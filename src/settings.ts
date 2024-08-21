@@ -1,19 +1,15 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import MFDIPlugin from "./main";
 import { mirrorMap } from "./utils/collections";
-import { TextComponentEvent } from "./obsutils/settings";
 import TLPlugin from "./main";
 
 export interface Settings {
   leaf: string;
   autoStartOnLaunch: boolean;
-  enableCalloutFormat: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   leaf: "left",
   autoStartOnLaunch: false,
-  enableCalloutFormat: false,
 };
 
 const leafOptions = ["left", "current", "right"];
@@ -55,20 +51,6 @@ export class TLSettingTab extends PluginSettingTab {
         tc.setValue(this.plugin.settings.autoStartOnLaunch).onChange(
           async (value) => {
             this.plugin.settings.autoStartOnLaunch = value;
-            await this.plugin.saveSettings();
-          },
-        );
-      });
-
-    new Setting(containerEl)
-      .setName("書き込むフォーマットをcallout形式にする")
-      .setDesc(
-        "有効にするとcallout形式で書き込みます。以前のcodeブロック形式は、引き続き読み込むことができます。",
-      )
-      .addToggle((tc) => {
-        tc.setValue(this.plugin.settings.enableCalloutFormat).onChange(
-          async (value) => {
-            this.plugin.settings.enableCalloutFormat = value;
             await this.plugin.saveSettings();
           },
         );

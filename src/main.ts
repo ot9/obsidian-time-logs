@@ -25,7 +25,7 @@ export default class TLPlugin extends Plugin {
         await this.attachTLView();
       }
     });
-    this.addRibbonIcon("pencil", "Mobile First Daily Interface", async () => {
+    this.addRibbonIcon("pencil", "Time Logs", async () => {
       await this.attachTLView();
     });
   }

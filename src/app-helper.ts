@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, moment, TFile } from "obsidian";
 import { Moment } from "moment";
 import { pickTaskName } from "./utils/strings";
+import { resolve } from "path";
 
 export interface PostBlock {
   blockType: string;
@@ -36,13 +37,13 @@ export class AppHelper {
   async setCheckMark(
     path: string,
     mark: "x" | " " | string,
-    offset: number
+    offset: number,
   ): Promise<void> {
     const origin = await this.loadFile(path);
     const markOffset = offset + origin.slice(offset).indexOf("[") + 1;
     await this.unsafeApp.vault.adapter.write(
       path,
-      `${origin.slice(0, markOffset)}${mark}${origin.slice(markOffset + 1)}`
+      `${origin.slice(0, markOffset)}${mark}${origin.slice(markOffset + 1)}`,
     );
   }
 
@@ -63,17 +64,31 @@ export class AppHelper {
     return this.unsafeApp.vault.adapter.append(file.path, text);
   }
 
+  async insertTextToTimeline(file: TFile, text: string) {
+    const content = await this.loadFile(file.path);
+    // return this.unsafeApp.vault.adapter.write(file.path, content);
+    const sectionStart = content.indexOf("# Timeline");
+    const sectionEnd = content.indexOf("\n\n", sectionStart);
+
+    const suffix = content.slice(0, sectionStart);
+    const prefix = content.slice(sectionEnd);
+    const sectionText = content.slice(sectionStart, sectionEnd);
+    const updatedText =
+      suffix + sectionText + "\n" + text.trim() + "\n" + prefix;
+    return this.unsafeApp.vault.adapter.write(file.path, updatedText);
+  }
+
   async getPostBlocks(file: TFile): Promise<PostBlock[] | null> {
     const content = await this.loadFile(file.path);
 
     return (
       this.unsafeApp.metadataCache
         .getFileCache(file)
-        ?.sections?.filter((x) => (x.type === "callout" || x.type === "code"))
+        ?.sections?.filter((x) => x.type === "callout" || x.type === "code")
         .map((x) => {
           const str = content.slice(
             x.position.start.offset,
-            x.position.end.offset
+            x.position.end.offset,
           );
           const lines = str.split("\n");
           const offset = x.position.start.offset;
@@ -89,9 +104,10 @@ export class AppHelper {
                 blockType: lines[0].split(" ")[0].replace("````", ""),
                 timestamp: moment(lines[0].split(" ")[1]),
                 body: lines.slice(1, -1).join("\n"),
-                offset: offset
-              }
-            } else { // if (x.type === "callout") {
+                offset: offset,
+              };
+            } else {
+              // if (x.type === "callout") {
               /*
               > [!${blockType}] ${timestamp}
               > ${body}
@@ -100,9 +116,12 @@ export class AppHelper {
               return {
                 blockType: matches && matches[1] ? matches[1] : "",
                 timestamp: moment(lines[0].split(" ")[2]),
-                body: lines.slice(1).map((l) => l.replace(/^>\s*/, "")).join("\n"),
-                offset: offset
-              }
+                body: lines
+                  .slice(1)
+                  .map((l) => l.replace(/^>\s*/, ""))
+                  .join("\n"),
+                offset: offset,
+              };
             }
           })();
 

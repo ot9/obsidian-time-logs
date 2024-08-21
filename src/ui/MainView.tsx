@@ -31,7 +31,7 @@ export class MainView extends ItemView {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <ReactView />
+        <ReactView app={this.app} settings={this.settings} />
       </React.StrictMode>,
     );
   }
