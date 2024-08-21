@@ -35,7 +35,7 @@ export class TLSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("表示リーフ")
-      .setDesc("MFDI Viewを表示するリーフを指定します。")
+      .setDesc("TL Viewを表示するリーフを指定します。")
       .addDropdown((tc) =>
         tc
           .addOptions(mirrorMap(leafOptions, (x) => x))
@@ -49,7 +49,7 @@ export class TLSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Obsidian起動時に自動起動・アクティブにする")
       .setDesc(
-        "有効にするとObsidian起動時にMFDIのViewが自動で起動し、アクティブになります。",
+        "有効にするとObsidian起動時にTLのViewが自動で起動し、アクティブになります。",
       )
       .addToggle((tc) => {
         tc.setValue(this.plugin.settings.autoStartOnLaunch).onChange(
