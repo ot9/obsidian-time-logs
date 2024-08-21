@@ -149,6 +149,7 @@ export const ReactView = ({
     };
   }, [date, currentDailyNote]);
 
+  // TODO 動かねえ
   const [isFocusTextarea, setIsFocusTextarea] = useState(false);
   const handleKeydown = (e: KeyboardEvent) => {
     console.log(e);
