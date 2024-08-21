@@ -1,46 +1,43 @@
 import { Notice, Plugin, View } from "obsidian";
 import { AppHelper } from "./app-helper";
-import { MFDIView, VIEW_TYPE_MFDI } from "./ui/MDFIView";
-import { DEFAULT_SETTINGS, MFDISettingTab, Settings } from "./settings";
+import { MainView, VIEW_TYPE_MAIN } from "./ui/MainView";
+import { DEFAULT_SETTINGS, Settings, TLSettingTab } from "./settings";
 
-export default class MFDIPlugin extends Plugin {
+export default class TLPlugin extends Plugin {
   appHelper: AppHelper;
   settings: Settings;
-  settingTab: MFDISettingTab;
+  settingTab: TLSettingTab;
 
   async onload() {
     this.appHelper = new AppHelper(this.app);
 
     await this.loadSettings();
-    this.settingTab = new MFDISettingTab(this.app, this);
+    this.settingTab = new TLSettingTab(this.app, this);
     this.addSettingTab(this.settingTab);
 
     this.registerView(
-      VIEW_TYPE_MFDI,
-      (leaf) => new MFDIView(leaf, this.settings)
+      VIEW_TYPE_MAIN,
+      (leaf) => new MainView(leaf, this.settings),
     );
 
     this.app.workspace.onLayoutReady(async () => {
       if (this.settings.autoStartOnLaunch) {
-        await this.attachMFDIView();
+        await this.attachTLView();
       }
     });
     this.addRibbonIcon("pencil", "Mobile First Daily Interface", async () => {
-      await this.attachMFDIView();
+      await this.attachTLView();
     });
   }
 
   async onunload() {
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_MFDI);
+    this.app.workspace.detachLeavesOfType(VIEW_TYPE_MAIN);
   }
 
-  /**
-   * MFDIのViewをアタッチします
-   */
-  async attachMFDIView() {
-    const existed = this.app.workspace.getLeavesOfType(VIEW_TYPE_MFDI).at(0);
+  async attachTLView() {
+    const existed = this.app.workspace.getLeavesOfType(VIEW_TYPE_MAIN).at(0);
     if (existed) {
-      existed.setViewState({ type: VIEW_TYPE_MFDI, active: true });
+      existed.setViewState({ type: VIEW_TYPE_MAIN, active: true });
       return;
     }
 
@@ -48,17 +45,17 @@ export default class MFDIPlugin extends Plugin {
       this.settings.leaf === "left"
         ? this.app.workspace.getLeftLeaf(false)
         : this.settings.leaf === "current"
-        ? this.app.workspace.getActiveViewOfType(View)?.leaf
-        : this.settings.leaf === "right"
-        ? this.app.workspace.getRightLeaf(false)
-        : undefined;
+          ? this.app.workspace.getActiveViewOfType(View)?.leaf
+          : this.settings.leaf === "right"
+            ? this.app.workspace.getRightLeaf(false)
+            : undefined;
     if (!targetLeaf) {
       new Notice(`表示リーフの設定が不正です: ${this.settings.leaf}`);
       return;
     }
 
     await targetLeaf.setViewState({
-      type: VIEW_TYPE_MFDI,
+      type: VIEW_TYPE_MAIN,
       active: true,
     });
   }

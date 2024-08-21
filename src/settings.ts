@@ -2,29 +2,26 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import MFDIPlugin from "./main";
 import { mirrorMap } from "./utils/collections";
 import { TextComponentEvent } from "./obsutils/settings";
+import TLPlugin from "./main";
 
 export interface Settings {
   leaf: string;
   autoStartOnLaunch: boolean;
   enableCalloutFormat: boolean;
-  blueskyIdentifier: string;
-  blueskyAppPassword: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   leaf: "left",
   autoStartOnLaunch: false,
   enableCalloutFormat: false,
-  blueskyIdentifier: "",
-  blueskyAppPassword: "",
 };
 
 const leafOptions = ["left", "current", "right"];
 
-export class MFDISettingTab extends PluginSettingTab {
-  plugin: MFDIPlugin;
+export class TLSettingTab extends PluginSettingTab {
+  plugin: TLPlugin;
 
-  constructor(app: App, plugin: MFDIPlugin) {
+  constructor(app: App, plugin: TLPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -46,57 +43,35 @@ export class MFDISettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.leaf = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
 
     new Setting(containerEl)
       .setName("Obsidian起動時に自動起動・アクティブにする")
       .setDesc(
-        "有効にするとObsidian起動時にMFDIのViewが自動で起動し、アクティブになります。"
+        "有効にするとObsidian起動時にMFDIのViewが自動で起動し、アクティブになります。",
       )
       .addToggle((tc) => {
         tc.setValue(this.plugin.settings.autoStartOnLaunch).onChange(
           async (value) => {
             this.plugin.settings.autoStartOnLaunch = value;
             await this.plugin.saveSettings();
-          }
+          },
         );
       });
 
     new Setting(containerEl)
       .setName("書き込むフォーマットをcallout形式にする")
-      .setDesc("有効にするとcallout形式で書き込みます。以前のcodeブロック形式は、引き続き読み込むことができます。")
+      .setDesc(
+        "有効にするとcallout形式で書き込みます。以前のcodeブロック形式は、引き続き読み込むことができます。",
+      )
       .addToggle((tc) => {
         tc.setValue(this.plugin.settings.enableCalloutFormat).onChange(
           async (value) => {
             this.plugin.settings.enableCalloutFormat = value;
             await this.plugin.saveSettings();
-          }
-        );
-      });
-
-    containerEl.createEl("h3", { text: "🦋 Bluesky" });
-
-    new Setting(containerEl).setName("Blueskyのidentifier").addText((cb) => {
-      TextComponentEvent.onChange(cb, async (value) => {
-        this.plugin.settings.blueskyIdentifier = value;
-        await this.plugin.saveSettings();
-      })
-        .setValue(this.plugin.settings.blueskyIdentifier)
-        .setPlaceholder("例: mfdi.bsky.social");
-    });
-
-    new Setting(containerEl)
-      .setName("Blueskyのアプリパスワード")
-      .addText((cb) => {
-        TextComponentEvent.onChange(
-          cb,
-          async (value) => {
-            this.plugin.settings.blueskyAppPassword = value;
-            await this.plugin.saveSettings();
           },
-          { secret: true }
-        ).setValue(this.plugin.settings.blueskyAppPassword);
+        );
       });
   }
 }
