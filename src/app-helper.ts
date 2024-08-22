@@ -74,7 +74,7 @@ export class AppHelper {
     const prefix = content.slice(sectionEnd);
     const sectionText = content.slice(sectionStart, sectionEnd);
     const updatedText =
-      suffix + sectionText + "\n" + text.trim() + "\n" + prefix;
+      suffix + sectionText + "\n" + text.trim() + prefix;
     return this.unsafeApp.vault.adapter.write(file.path, updatedText);
   }
 

@@ -25,8 +25,19 @@ export default class TLPlugin extends Plugin {
         await this.attachTLView();
       }
     });
-    this.addRibbonIcon("pencil", "Time Logs", async () => {
-      await this.attachTLView();
+    this.addCommand({
+      id: "post-new-time-log",
+      name: "Post new time log",
+      callback: () => {
+        console.log('pressed!');
+        window.dispatchEvent(new CustomEvent('postNewTimeLog'));
+      },
+      hotkeys: [
+        {
+          modifiers: ['Ctrl'],
+          key: 'enter',
+        },
+      ],
     });
   }
 

@@ -24,7 +24,7 @@ export class MainView extends ItemView {
   }
 
   getDisplayText() {
-    return "Example view";
+    return "TimeLogs view";
   }
 
   async onOpen() {

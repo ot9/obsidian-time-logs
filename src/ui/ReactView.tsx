@@ -2,10 +2,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExternalLinkIcon,
-  ChatIcon,
-  CheckCircleIcon,
 } from "@chakra-ui/icons";
-import { Flex, HStack, Box, Button, Input, Textarea } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Input, Textarea } from "@chakra-ui/react";
 import { Moment } from "moment";
 import { App, moment, Notice, TFile } from "obsidian";
 import {
@@ -14,8 +12,8 @@ import {
   getDailyNote,
   getDailyNoteSettings,
 } from "obsidian-daily-notes-interface";
-import { useState, useMemo, useEffect, useCallback, ChangeEvent } from "react";
-import { AppHelper, PostBlock, Task } from "src/app-helper";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { AppHelper, PostBlock } from "src/app-helper";
 import { Settings } from "src/settings";
 import { sorter } from "src/utils/collections";
 import { replaceDayToJa } from "src/utils/strings";
@@ -32,6 +30,7 @@ export const ReactView = ({
   const [currentDailyNote, setCurrentDailyNote] = useState<TFile | null>(null);
   const [input, setInput] = useState("");
   const [posts, setPosts] = useState<PostBlock[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const canSubmit = useMemo(() => input.length > 0, [input]);
 
   const updateCurrentDailyNote = () => {
@@ -77,8 +76,9 @@ export const ReactView = ({
     setDate(moment());
   };
 
-  const handleClickSubmit = async () => {
-    const text = `- ${moment().format("hh:mm")} ${input.replace("\n", "\n  ")}`;
+  const handleClickSubmit = useCallback(async () => {
+    setIsLoading(true);
+    const text = `- ${moment().format("HH:mm")} ${input.replace("\n", "\n  ")}`;
 
     if (!currentDailyNote) {
       new Notice("デイリーノートが存在しなかったので新しく作成しました");
@@ -93,7 +93,8 @@ export const ReactView = ({
       text,
     );
     setInput("");
-  };
+    setIsLoading(false);
+  }, [currentDailyNote, date, appHelper, input]);
 
   useEffect(() => {
     updateCurrentDailyNote();
@@ -149,22 +150,18 @@ export const ReactView = ({
     };
   }, [date, currentDailyNote]);
 
-  // TODO 動かねえ
-  const [isFocusTextarea, setIsFocusTextarea] = useState(false);
-  const handleKeydown = (e: KeyboardEvent) => {
-    console.log(e);
-    if (isFocusTextarea && e.ctrlKey && e.key === "Enter") {
-      e.preventDefault();
+  const handleKeydown = () => {
+    if (input) {
       handleClickSubmit();
     }
   };
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeydown);
+    window.addEventListener("postNewTimeLog", handleKeydown);
     return () => {
-      window.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("postNewTimeLog", handleKeydown);
     };
-  }, []);
+  }, [input]);
 
   return (
     <Flex
@@ -221,17 +218,13 @@ export const ReactView = ({
         value={input}
         onChange={(e) => setInput(e.target.value)}
         minHeight={"8em"}
+        isDisabled={isLoading}
         resize="vertical"
-        onFocus={() => {
-          setIsFocusTextarea(true);
-        }}
-        onBlur={() => {
-          setIsFocusTextarea(false);
-        }}
       />
       <HStack>
         <Button
           isDisabled={!canSubmit}
+          isLoading={isLoading}
           className={canSubmit ? "mod-cta" : ""}
           minHeight={"2.4em"}
           maxHeight={"2.4em"}
