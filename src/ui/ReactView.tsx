@@ -94,6 +94,8 @@ export const ReactView = ({
     );
     setInput("");
     setIsLoading(false);
+    // 投稿後日付を今日にする
+    setDate(moment());
   }, [currentDailyNote, date, appHelper, input]);
 
   useEffect(() => {
